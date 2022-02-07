@@ -1,7 +1,7 @@
 /* -------
  * PMPMEAS
  * -------
- * 
+ *
  * Copyright 2022 Dirk Pleiter (pleiter@kth.se)
  *
  * Redistribution and use in source and binary forms, with or without
@@ -11,16 +11,16 @@
  * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
  *
- * 2. The origin of this software must not be misrepresented; you must 
- *    not claim that you wrote the original software.  If you use this 
- *    software in a product, an acknowledgment in the product 
+ * 2. The origin of this software must not be misrepresented; you must
+ *    not claim that you wrote the original software.  If you use this
+ *    software in a product, an acknowledgment in the product
  *    documentation would be appreciated but is not required.
  *
  * 3. Altered source versions must be plainly marked as such, and must
  *    not be misrepresented as being the original software.
  *
- * 4. The name of the author may not be used to endorse or promote 
- *    products derived from this software without specific prior written 
+ * 4. The name of the author may not be used to endorse or promote
+ *    products derived from this software without specific prior written
  *    permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS
@@ -46,29 +46,36 @@ namespace PMPMEAS {
 
 class PapiInf
 {
-  private:
+private:
     static int _cnt;
 
     int _ctx;
-    int _nevent;
-    std::string _ename[PAPICNTMAX];
-    long long _ecnt[PAPICNTMAX];
+    int _nevent;                        //!< Number of events
+    std::string _ename[PAPICNTMAX];     //!< Event name
+    long long _eval[PAPICNTMAX];        //!< Event value
 
-  public:
+public:
     PapiInf(void);
 
-    int create(const std::string& ename);
+    int create(const std::string&);
     void cleanup();
 
     void start(void);
     void stop(void);
 
-    long long cnt(int i) const;
-    const char* name(int i) const;
+    long long eval(int i) const
+    {
+        return _eval[i];
+    }
+
+    const char* ename(int i) const
+    {
+        return _ename[i].c_str();
+    }
 
     int nevent() const
     {
-      return _nevent;
+        return _nevent;
     }
 };
 

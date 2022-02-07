@@ -36,46 +36,22 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <stdio.h>
-#include "pmpmeas-api.h"
-#include "pmpmeas.hh"
+// PMPMEAS name, perf type, perf config
+// See: /usr/include/linux/perf_event.h and https://github.com/efficient/memc3/blob/master/perf_count.c
 
-void pmpmeas_init()
-{
-//fprintf(stderr, "DEBUG: pmpmeas_init()\n");
-    pmpmeas__init();
-}
+xx(cycles,                  PERF_TYPE_HARDWARE, PERF_COUNT_HW_CPU_CYCLES)
+xx(ref_cycles,              PERF_TYPE_HARDWARE, PERF_COUNT_HW_REF_CPU_CYCLES)
 
-void pmpmeas_start_fortran(const char* tag, float *weight)
-{
-//fprintf(stderr, "DEBUG: pmpmeas_start_fortran(%s) weight=%e\n", tag, *weight);
-    pmpmeas__start(tag, *weight);
-}
+xx(L1_dcache_loads,         PERF_TYPE_HW_CACHE, (PERF_COUNT_HW_CACHE_L1D  | (PERF_COUNT_HW_CACHE_OP_READ << 8)  | (PERF_COUNT_HW_CACHE_RESULT_ACCESS << 16)))
+xx(L1_dcache_load_misses,   PERF_TYPE_HW_CACHE, (PERF_COUNT_HW_CACHE_L1D  | (PERF_COUNT_HW_CACHE_OP_READ << 8)  | (PERF_COUNT_HW_CACHE_RESULT_MISS << 16)))
 
-void pmpmeas_start(const char* tag, float weight)
-{
-//fprintf(stderr, "DEBUG: pmpmeas_start(%s) weight=%e\n", tag, weight);
-    pmpmeas__start(tag, weight);
-}
+xx(L1_dcache_stores,        PERF_TYPE_HW_CACHE, (PERF_COUNT_HW_CACHE_L1D  | (PERF_COUNT_HW_CACHE_OP_WRITE << 8) | (PERF_COUNT_HW_CACHE_RESULT_ACCESS << 16)))
 
-void pmpmeas_stop_()
-{
-    pmpmeas_stop();
-}
+xx(LLC_loads,               PERF_TYPE_HW_CACHE, (PERF_COUNT_HW_CACHE_LL   | (PERF_COUNT_HW_CACHE_OP_READ  << 8) | (PERF_COUNT_HW_CACHE_RESULT_ACCESS << 16)))
+xx(LLC_load_misses,         PERF_TYPE_HW_CACHE, (PERF_COUNT_HW_CACHE_LL   | (PERF_COUNT_HW_CACHE_OP_READ  << 8) | (PERF_COUNT_HW_CACHE_RESULT_MISS << 16)))
+xx(LLC_stores,              PERF_TYPE_HW_CACHE, (PERF_COUNT_HW_CACHE_LL   | (PERF_COUNT_HW_CACHE_OP_WRITE << 8) | (PERF_COUNT_HW_CACHE_RESULT_ACCESS << 16)))
 
-void pmpmeas_stop()
-{
-//fprintf(stderr, "DEBUG: pmpmeas_stop()\n");
-    pmpmeas__stop();
-}
+xx(dTLB_loads,              PERF_TYPE_HW_CACHE, (PERF_COUNT_HW_CACHE_DTLB | (PERF_COUNT_HW_CACHE_OP_READ << 8)  | (PERF_COUNT_HW_CACHE_RESULT_ACCESS << 16)))
+xx(dTLB_load_misses,        PERF_TYPE_HW_CACHE, (PERF_COUNT_HW_CACHE_DTLB | (PERF_COUNT_HW_CACHE_OP_READ << 8)  | (PERF_COUNT_HW_CACHE_RESULT_MISS << 16)))
 
-void pmpmeas_finish_()
-{
-    pmpmeas_finish();
-}
-
-void pmpmeas_finish()
-{
-//fprintf(stderr, "DEBUG: pmpmeas_finish()\n");
-    pmpmeas__finish();
-}
+#undef xx

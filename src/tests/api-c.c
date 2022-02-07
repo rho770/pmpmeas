@@ -1,7 +1,7 @@
 /* -------
  * PMPMEAS
  * -------
- * 
+ *
  * Copyright 2022 Dirk Pleiter (pleiter@kth.se)
  *
  * Redistribution and use in source and binary forms, with or without
@@ -11,16 +11,16 @@
  * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
  *
- * 2. The origin of this software must not be misrepresented; you must 
- *    not claim that you wrote the original software.  If you use this 
- *    software in a product, an acknowledgment in the product 
+ * 2. The origin of this software must not be misrepresented; you must
+ *    not claim that you wrote the original software.  If you use this
+ *    software in a product, an acknowledgment in the product
  *    documentation would be appreciated but is not required.
  *
  * 3. Altered source versions must be plainly marked as such, and must
  *    not be misrepresented as being the original software.
  *
- * 4. The name of the author may not be used to endorse or promote 
- *    products derived from this software without specific prior written 
+ * 4. The name of the author may not be used to endorse or promote
+ *    products derived from this software without specific prior written
  *    permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS
@@ -45,29 +45,29 @@ double x;
 
 int main()
 {
-  printf("TEST:  This is the C main program\n");
+    printf("TEST:  This is the C main program\n");
 
-  pmpmeas_init();
+    pmpmeas_init();
 
-  x = 1e-16;
-  for (int i = 0; i < 100; i++)
-  {
-    pmpmeas_start("main::c", 1./N);
+    x = 1e-16;
+    for (int i = 0; i < 100; i++)
+    {
+        pmpmeas_start("main::c", 1./N);
 
-    for (int j = 0; j < 100000; j++)
-      x *= 1.000000001;
+        for (int j = 0; j < 100000; j++)
+            x *= 1.000000001;
 
-    pmpmeas_stop();
-  }
-  printf("x=%e\n", x);
+        pmpmeas_stop();
+    }
+    printf("x=%e\n", x);
 
-  for (int i = 0; i < 100; i++)
-  {
-    pmpmeas_start("empty", 1.);
-    pmpmeas_stop("empty");
-  }
+    for (int i = 0; i < 100; i++)
+    {
+        pmpmeas_start("empty", 1.);
+        pmpmeas_stop("empty");
+    }
 
-  pmpmeas_finish();
+    pmpmeas_finish();
 
-  return 0;
+    return 0;
 }

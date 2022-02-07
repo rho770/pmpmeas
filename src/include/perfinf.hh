@@ -36,46 +36,64 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <stdio.h>
-#include "pmpmeas-api.h"
-#include "pmpmeas.hh"
+/*
+ * Code for access to perf counters
+*/
 
-void pmpmeas_init()
-{
-//fprintf(stderr, "DEBUG: pmpmeas_init()\n");
-    pmpmeas__init();
-}
+#ifndef PMPMEAS_PERFINF_H
+#define PMPMEAS_PERFINF_H
 
-void pmpmeas_start_fortran(const char* tag, float *weight)
-{
-//fprintf(stderr, "DEBUG: pmpmeas_start_fortran(%s) weight=%e\n", tag, *weight);
-    pmpmeas__start(tag, *weight);
-}
+#include <string>
+#include <inttypes.h>
+#include <unistd.h>
 
-void pmpmeas_start(const char* tag, float weight)
-{
-//fprintf(stderr, "DEBUG: pmpmeas_start(%s) weight=%e\n", tag, weight);
-    pmpmeas__start(tag, weight);
-}
+#define PERF_CNTMAX 5       //!< Maximum number of events
 
-void pmpmeas_stop_()
+class PerfInf
 {
-    pmpmeas_stop();
-}
+public:
+    enum Type {
+#       define xx(a, b, c) a,
+#       include "perfinftypesxx.h"
+    };
 
-void pmpmeas_stop()
-{
-//fprintf(stderr, "DEBUG: pmpmeas_stop()\n");
-    pmpmeas__stop();
-}
+private:
+    static int _cnt;                    //!< Number of instances (must be 0 or 1)
 
-void pmpmeas_finish_()
-{
-    pmpmeas_finish();
-}
+    int _nevent;
+    int _fd[PERF_CNTMAX];
+    std::string _ename[PAPICNTMAX];     //!< Event name
+    uint64_t _eid[PERF_CNTMAX];         //!< Event ID
+    uint64_t _eval[PERF_CNTMAX];        //!< Event value
 
-void pmpmeas_finish()
-{
-//fprintf(stderr, "DEBUG: pmpmeas_finish()\n");
-    pmpmeas__finish();
-}
+    char* _buf[4096];
+
+public:
+    PerfInf(void);
+
+    int create(const std::string&);
+    void cleanup();
+
+    void start(void);
+    void stop(void);
+
+    uint64_t eval(int i) const
+    {
+        return _eval[i];
+    }
+
+    const char* ename(int i) const
+    {
+        return _ename[i].c_str();
+    }
+
+    int nevent() const
+    {
+        return _nevent;
+    }
+
+private:
+    //long _perf_event_open(struct perf_event_attr *, pid_t, int, int, unsigned long);
+};
+
+#endif

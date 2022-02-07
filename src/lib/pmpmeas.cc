@@ -1,7 +1,7 @@
 /* -------
  * PMPMEAS
  * -------
- * 
+ *
  * Copyright 2022 Dirk Pleiter (pleiter@kth.se)
  *
  * Redistribution and use in source and binary forms, with or without
@@ -11,16 +11,16 @@
  * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
  *
- * 2. The origin of this software must not be misrepresented; you must 
- *    not claim that you wrote the original software.  If you use this 
- *    software in a product, an acknowledgment in the product 
+ * 2. The origin of this software must not be misrepresented; you must
+ *    not claim that you wrote the original software.  If you use this
+ *    software in a product, an acknowledgment in the product
  *    documentation would be appreciated but is not required.
  *
  * 3. Altered source versions must be plainly marked as such, and must
  *    not be misrepresented as being the original software.
  *
- * 4. The name of the author may not be used to endorse or promote 
- *    products derived from this software without specific prior written 
+ * 4. The name of the author may not be used to endorse or promote
+ *    products derived from this software without specific prior written
  *    permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS
@@ -43,7 +43,6 @@
 #include <list>
 #include "pmpmeas.hh"
 #include "meas.hh"
-#include "papiinf.hh"
 
 using namespace std;
 using namespace PMPMEAS;
@@ -66,24 +65,24 @@ extern "C" {
 
 void pmpmeas__init()
 {
-  char* t = getenv("PMPMEAS_MEAS_TYPES");
-  if (t != NULL) {
-      char *c1 = t;
-      do {
-          char *c0 = c1;
-          for (; (*c1 != '\0') && (*c1 != ','); c1++);
-          if (*c1 == ',') {
-              *c1 = '\0';
+    char* t = getenv("PMPMEAS_MEAS_TYPES");
+    if (t != NULL) {
+        char *c1 = t;
+        do {
+            char *c0 = c1;
+            for (; (*c1 != '\0') && (*c1 != ';'); c1++);
+            if (*c1 == ';') {
+                *c1 = '\0';
 //fprintf(stderr, "DEBUG: Measuring \"%s\"\n", c0);
-              pmpmeas_type_lst.push_back(new MeasType(c0));
-          }
-          else {
+                pmpmeas_type_lst.push_back(new MeasType(c0));
+            }
+            else {
 //fprintf(stderr, "DEBUG: Measuring \"%s\"\n", c0);
-              pmpmeas_type_lst.push_back(new MeasType(c0));
-              break;
-          }
-      } while (c1++);
-  }
+                pmpmeas_type_lst.push_back(new MeasType(c0));
+                break;
+            }
+        } while (c1++);
+    }
 }
 
 /*

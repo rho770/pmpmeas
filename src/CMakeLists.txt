@@ -14,7 +14,7 @@ option(USETIMEBASE "Enable time measurement using timebase register (POWER only)
 #set(CXX "g++-10")
 #set(CXXFLAGS "-g")
 
-add_library(lib_pmpmeas lib/pmpmeas-api.c lib/pmpmeas.cc lib/meas.cc lib/papiinf.cc)
+add_library(lib_pmpmeas lib/pmpmeas-api.c lib/pmpmeas.cc lib/meas.cc lib/papiinf.cc lib/perfinf.cc)
 add_executable(tests_api-c.x tests/api-c.c)
 add_executable(tests_api-cpp.x tests/api-cpp.cc)
 add_executable(tests_api-f90.x tests/api-f90.f90)
