@@ -103,7 +103,7 @@ public:
             _subtype.resize(1);
             _subtype[0] = type_str;
         }
-        else if (strncmp(type_str, "PAPI:", 5) == 0)
+        else if (strncmp(type_str, "PAPI=", 5) == 0)
         {
             _type = PAPI;
             char *c1 = &type_str[5];
@@ -122,7 +122,7 @@ public:
                 }
             } while (c1++);
         }
-        else if (strncmp(type_str, "PERF:", 5) == 0)
+        else if (strncmp(type_str, "PERF=", 5) == 0)
         {
             _type = PERF;
             char *c1 = &type_str[5];

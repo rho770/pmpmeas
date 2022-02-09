@@ -60,10 +60,10 @@ void Meas::dump(FILE* fp)
         switch (_type())
         {
         case MeasType::PAPI:
-            prefix = "PAPI:";
+            prefix = "PAPI=";
             break;
         case MeasType::PERF:
-            prefix = "PERF:";
+            prefix = "PERF=";
             break;
         }
         fprintf(fp, "Type[%d]:     %s%s\n", i, prefix, _type.typestr(i));

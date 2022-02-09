@@ -58,20 +58,10 @@ void pmpmeas_start(const char* tag, float weight)
     pmpmeas__start(tag, weight);
 }
 
-void pmpmeas_stop_()
-{
-    pmpmeas_stop();
-}
-
 void pmpmeas_stop()
 {
 //fprintf(stderr, "DEBUG: pmpmeas_stop()\n");
     pmpmeas__stop();
-}
-
-void pmpmeas_finish_()
-{
-    pmpmeas_finish();
 }
 
 void pmpmeas_finish()

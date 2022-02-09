@@ -24,8 +24,8 @@ The content of the environment variable has to take the following form: ```<type
 - ```TIME_BOOT```: Measure time by calling the function ```clock_gettime``` with the clock ```CLOCK_BOOTTIME```
 - ```TIME_CPU```: Measure time by calling the function ```clock_gettime``` with the clock ```CLOCK_PROCESS_CPUTIME_ID```
 - ```TIME_THRD```: Measure time by calling the function ```clock_gettime``` with the clock ```CLOCK_THREAD_CPUTIME_ID```
-- ```PAPI:<event>[,<event>]```: Use the PAPI low-level interface with ```event``` being the name of an event as shown by ```papi_avail``` or ```papi_native_avail```
-- ```PERF:<event>[,event>]```: Use the perf interface with ```event``` being either of the following values (check ```src/include/perfinftypesxx.h``` for possible changes):
+- ```PAPI=<event>[,<event>]```: Use the PAPI low-level interface with ```event``` being the name of an event as shown by ```papi_avail``` or ```papi_native_avail```
+- ```PERF=<event>[,event>]```: Use the perf interface with ```event``` being either of the following values (check ```src/include/perfinftypesxx.h``` for possible changes):
   - ```cycles```
   - ```ref_cycles```
   - ```L1_dcache_loads```
@@ -40,6 +40,6 @@ The content of the environment variable has to take the following form: ```<type
 Some examples:
 
 - ```export PMPMEAS_MEAS_TYPES="TIME_CPU;PAPI=PAPI_L1_DCM,PAPI_L2_DCM"```
-- ```export PMPMEAS_MEAS_TYPES="TIME_CPU;PERF:cycles,LLC_loads"```
+- ```export PMPMEAS_MEAS_TYPES="TIME_CPU;PERF=cycles,LLC_loads"```
 
 At the end of each run, the results will be dumped in a file in the local directory with a unique name.
