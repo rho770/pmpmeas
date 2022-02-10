@@ -73,11 +73,9 @@ void pmpmeas__init()
             for (; (*c1 != '\0') && (*c1 != ';'); c1++);
             if (*c1 == ';') {
                 *c1 = '\0';
-//fprintf(stderr, "DEBUG: Measuring \"%s\"\n", c0);
                 pmpmeas_type_lst.push_back(new MeasType(c0));
             }
             else {
-//fprintf(stderr, "DEBUG: Measuring \"%s\"\n", c0);
                 pmpmeas_type_lst.push_back(new MeasType(c0));
                 break;
             }
@@ -89,12 +87,10 @@ void pmpmeas__init()
  * Start measurement
  */
 
-void pmpmeas__start(const char *tag, float weight)
+void pmpmeas__start(const char *tag)
 {
     ctag = tag;
     tstart = time(NULL);
-
-//fprintf(stderr, "DEBUG: pmpmeas_start() tag=[%s]\n", ctag.c_str());
 
     pmpmeas_match_lst.clear();
 
@@ -111,20 +107,17 @@ void pmpmeas__start(const char *tag, float weight)
         }
 
     for (list<Meas*>::iterator m = pmpmeas_match_lst.begin(); m != pmpmeas_match_lst.end(); m++)
-        (*m)->start(weight);
+        (*m)->start();
 }
 
-void pmpmeas__stop()
+void pmpmeas__stop(float weight)
 {
-//fprintf(stderr, "DEBUG: pmpmeas_stop() tag=[%s]\n", ctag.c_str());
-
     for (list<Meas*>::iterator m = pmpmeas_match_lst.begin(); m != pmpmeas_match_lst.end(); m++)
-        (*m)->stop();
+        (*m)->stop(weight);
 }
 
 void pmpmeas__finish()
 {
-//fprintf(stderr, "DEBUG: pmpmeas_finish()\n");
     struct tm * timeinfo;
     char buf[1024];
     char fname[1024];
@@ -132,7 +125,6 @@ void pmpmeas__finish()
 
     snprintf(fname, 1024, "pmpmeas_%06d_XXXXXX", pid);
     mkstemp(fname);
-//fprintf(stderr, "DEBUG[%s,%d] fname=%s\n", __FILE__, __LINE__, fname);
     FILE *fp = fopen(fname, "w");
     if (fp == NULL)
     {

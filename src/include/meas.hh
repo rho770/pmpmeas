@@ -42,7 +42,7 @@
 #include <stdint.h>
 #include <assert.h>
 #include <time.h>
-#include <limits.h>
+#include <limits>
 #include <vector>
 #include <string>
 #include "meastypes.hh"
@@ -77,7 +77,6 @@ public:
             {
                 for (int i = 0; i < type.cnt(); i++)
                 {
-//fprintf(stderr, "DEBUG[%s,%d] Add PAPI event [%s]\n", __FILE__, __LINE__, type.typestr(i));
                     _papi.create(_type.typestr(i));
                     _cnt++;
                 }
@@ -90,7 +89,6 @@ public:
             {
                 for (int i = 0; i < type.cnt(); i++)
                 {
-//fprintf(stderr, "DEBUG[%s,%d] Add perf event [%s]\n", __FILE__, __LINE__, type.typestr(i));
                     _perf.create(_type.typestr(i));
                     _cnt++;
                 }
@@ -113,7 +111,7 @@ public:
         {
             _t[0][i] = 0;
             _t[1][i] = 0;
-            _min[i]  = ULLONG_MAX;
+            _min[i]  = std::numeric_limits<double>::max();
             _max[i]  = 0;
         }
     }
@@ -123,14 +121,14 @@ public:
         return _tag;
     }
 
-    inline void start(float weight = 1.0)
+    inline void start()
     {
-        _cweight = weight;
         _get(0);
     }
 
-    inline void stop(void)
+    inline void stop(float weight = 1.0)
     {
+        _cweight = weight;
         _get(1);
     }
 
@@ -173,7 +171,6 @@ private:
             struct timespec ts;
             clock_gettime(CLOCK_BOOTTIME, &ts);
             _t[i][0] = ts.tv_sec * 1000000000ULL + ts.tv_nsec;
-//fprintf(stderr, "DEBUG[%s,%d] _t[%d][0] = %lu\n", __FILE__, __LINE__, i, _t[i][0]);
             break;
         }
 
@@ -182,7 +179,6 @@ private:
             struct timespec ts;
             clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &ts);
             _t[i][0] = ts.tv_sec * 1000000000ULL + ts.tv_nsec;
-//fprintf(stderr, "DEBUG[%s,%d] _t[%d][0] = %lu\n", __FILE__, __LINE__, i, _t[i][0]);
             break;
         }
 
@@ -191,7 +187,6 @@ private:
             struct timespec ts;
             clock_gettime(CLOCK_THREAD_CPUTIME_ID, &ts);
             _t[i][0] = ts.tv_sec * 1000000000ULL + ts.tv_nsec;
-//fprintf(stderr, "DEBUG[%s,%d] _t[%d][0] = %lu\n", __FILE__, __LINE__, i, _t[i][0]);
             break;
         }
 
@@ -209,8 +204,6 @@ private:
                 for (int j = 0; j < _cnt; j++)
                 {
                     _t[1][j] = _papi.eval(j);
-//if (_t[1][j] > 1e5)
-//    fprintf(stderr, "DEBUG[%s,%d] j=%d, t[1]=%llu\n", __FILE__, __LINE__, j, _t[1][j]);
                 }
             }
             break;
@@ -230,8 +223,6 @@ private:
                 for (int j = 0; j < _cnt; j++)
                 {
                     _t[1][j] = _perf.eval(j);
-//if (_t[1][j] > 1e5)
-//    fprintf(stderr, "DEBUG[%s,%d] j=%d, t[1]=%llu\n", __FILE__, __LINE__, j, _t[1][j]);
                 }
             }
             break;
@@ -247,8 +238,6 @@ private:
             for (int j = 0; j < _cnt; j++)
             {
                 double d = (_t[1][j] - _t[0][j]) * _cweight;
-//if (d > 1e5)
-//    fprintf(stderr, "DEBUG[%s,%d] j=%d, t[0]=%llu, t[1]=%llu, d=%e\n", __FILE__, __LINE__, j, _t[0][j], _t[1][j], d);
                 _mean[j] += d;
                 if (d < _min[j])
                     _min[j] = d;

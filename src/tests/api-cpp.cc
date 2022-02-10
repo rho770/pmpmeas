@@ -44,8 +44,8 @@ int main()
     std::cout << "TEST:  This is the C++ main program\n";
 
     pmpmeas_init();
-    pmpmeas_start("main::c++", 1.0);
-    pmpmeas_stop();
+    pmpmeas_start("main::c++");
+    pmpmeas_stop(1.0);
     pmpmeas_finish();
 
     return 0;

@@ -52,19 +52,19 @@ int main()
     x = 1e-16;
     for (int i = 0; i < 100; i++)
     {
-        pmpmeas_start("main::c", 1./N);
+        pmpmeas_start("main::c");
 
-        for (int j = 0; j < 100000; j++)
+        for (int j = 0; j < N; j++)
             x *= 1.000000001;
 
-        pmpmeas_stop();
+        pmpmeas_stop(1./(double) N);
     }
     printf("x=%e\n", x);
 
     for (int i = 0; i < 100; i++)
     {
-        pmpmeas_start("empty", 1.);
-        pmpmeas_stop("empty");
+        pmpmeas_start("empty");
+        pmpmeas_stop(1.0);
     }
 
     pmpmeas_finish();

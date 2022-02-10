@@ -9,11 +9,15 @@ To build the software, run ```cmake <path_to_source>``` in the directory where y
 The library provides only four functions to be used in your code:
 
 - ```pmpmeas_init```: Initialise the library
-- ```pmpmeas_start```: Start a measurement
-- ```pmpmeas_stop```: Stop a measurement
+- ```pmpmeas_start(tag)```: Start a measurement
+- ```pmpmeas_stop(weight)```: Stop a measurement
 - ```pmpmeas_finish```: Final clean-up and dump of measurements
 
 See examples for how to use PMPMEAS from C, C++ or Fortran in the directory ```src/tests```.
+
+```pmpmeas_start``` has to be provided with a unique tag that identifies a measurement.
+
+```pmpmeas_stop``` always stops a previously started measurement, i.e. no tag has to be specified. The weight factor allows to give a given measurement a specific weight. For instance, if the measurements includes a loop then the weight may be chosen as the inverse of the number of loop iterations.
 
 ### Using PMPMEAS
 

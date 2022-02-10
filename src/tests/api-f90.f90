@@ -35,8 +35,9 @@
 ! NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 ! SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-include 'pmpmeas-api.h90'
-use PMPMEAS
+program API_F90
+
+use M_PMPMEAS
 
 use ISO_C_BINDING, only : C_NULL_CHAR
 
@@ -47,21 +48,21 @@ write(*,*) "This is the Fortran main program"
 call pmpmeas_init()
 
 do i = 1, 10
-  call pmpmeas_start("main::f90"//C_NULL_CHAR, 1.0)
+  call pmpmeas_start("main::f90"//C_NULL_CHAR)
 
   x = 1e-16
   do j = 1, 100000
     x = x * 1.00000001
   end do
 
-  call pmpmeas_stop()
+  call pmpmeas_stop(1./100000)
 end do
 
 write(*,*) x
 
 do i = 1, 10
-  call pmpmeas_start("empty"//C_NULL_CHAR, 1.0)
-  call pmpmeas_stop()
+  call pmpmeas_start("empty"//C_NULL_CHAR)
+  call pmpmeas_stop(1.0)
 end do
 
 call pmpmeas_finish()

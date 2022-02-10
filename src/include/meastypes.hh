@@ -80,6 +80,9 @@ public:
         case TIME_THRD:
             _subtype[0] = "TIME_THRD";
             break;
+        default:
+            _subtype[0] = "";
+            break;
         }
     }
 
@@ -106,17 +109,15 @@ public:
         else if (strncmp(type_str, "PAPI=", 5) == 0)
         {
             _type = PAPI;
-            char *c1 = &type_str[5];
+            char *c1 = (char *) &type_str[5];
             do {
                 char *c0 = c1;
                 for (; (*c1 != '\0') && (*c1 != ','); c1++);
                 if (*c1 == ',') {
                     *c1 = '\0';
-//fprintf(stderr, "DEBUG: PAPI event \"%s\"\n", c0);
                     _subtype.push_back(string(c0));
                 }
                 else {
-//fprintf(stderr, "DEBUG: PAPI event \"%s\"\n", c0);
                     _subtype.push_back(string(c0));
                     break;
                 }
@@ -125,17 +126,15 @@ public:
         else if (strncmp(type_str, "PERF=", 5) == 0)
         {
             _type = PERF;
-            char *c1 = &type_str[5];
+            char *c1 = (char *) &type_str[5];
             do {
                 char *c0 = c1;
                 for (; (*c1 != '\0') && (*c1 != ','); c1++);
                 if (*c1 == ',') {
                     *c1 = '\0';
-//fprintf(stderr, "DEBUG: PERF event \"%s\"\n", c0);
                     _subtype.push_back(string(c0));
                 }
                 else {
-//fprintf(stderr, "DEBUG: PERF event \"%s\"\n", c0);
                     _subtype.push_back(string(c0));
                     break;
                 }

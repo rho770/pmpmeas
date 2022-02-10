@@ -44,9 +44,9 @@ extern "C" {
 #endif
 
 void pmpmeas_init();
-void pmpmeas_start_fortran(const char*, float*);
-void pmpmeas_start(const char*, float);
-void pmpmeas_stop();
+void pmpmeas_start(const char*);
+void pmpmeas_stop(float);
+void pmpmeas_stop_fortran(float*);
 void pmpmeas_finish();
 
 #ifdef __cplusplus

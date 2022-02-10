@@ -42,30 +42,25 @@
 
 void pmpmeas_init()
 {
-//fprintf(stderr, "DEBUG: pmpmeas_init()\n");
     pmpmeas__init();
 }
 
-void pmpmeas_start_fortran(const char* tag, float *weight)
+void pmpmeas_start(const char* tag)
 {
-//fprintf(stderr, "DEBUG: pmpmeas_start_fortran(%s) weight=%e\n", tag, *weight);
-    pmpmeas__start(tag, *weight);
+    pmpmeas__start(tag);
 }
 
-void pmpmeas_start(const char* tag, float weight)
+void pmpmeas_stop(float weight)
 {
-//fprintf(stderr, "DEBUG: pmpmeas_start(%s) weight=%e\n", tag, weight);
-    pmpmeas__start(tag, weight);
+    pmpmeas__stop(weight);
 }
 
-void pmpmeas_stop()
+void pmpmeas_stop_fortran(float *weight)
 {
-//fprintf(stderr, "DEBUG: pmpmeas_stop()\n");
-    pmpmeas__stop();
+    pmpmeas__stop(*weight);
 }
 
 void pmpmeas_finish()
 {
-//fprintf(stderr, "DEBUG: pmpmeas_finish()\n");
     pmpmeas__finish();
 }

@@ -35,20 +35,21 @@
 ! NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 ! SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-module PMPMEAS
+module M_PMPMEAS
   use ISO_C_BINDING, only : C_CHAR, C_FLOAT
   interface
 
     subroutine pmpmeas_init() bind(C,name='pmpmeas_init')
     end subroutine
 
-    subroutine pmpmeas_start(tag, weight) bind(C,name='pmpmeas_start_fortran')
-      import C_CHAR, C_FLOAT
+    subroutine pmpmeas_start(tag) bind(C,name='pmpmeas_start')
+      import C_CHAR
       character(kind=C_CHAR),dimension(*) :: tag
-      real(kind=C_FLOAT)                  :: weight
     end subroutine
 
-    subroutine pmpmeas_stop() bind(C,name='pmpmeas_stop')
+    subroutine pmpmeas_stop(weight) bind(C,name='pmpmeas_stop_fortran')
+      import C_FLOAT
+      real(kind=C_FLOAT) :: weight
     end subroutine
 
     subroutine pmpmeas_finish() bind(C,name='pmpmeas_finish')

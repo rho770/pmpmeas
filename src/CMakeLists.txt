@@ -14,11 +14,11 @@ option(USETIMEBASE "Enable time measurement using timebase register (POWER only)
 #set(CXX "g++-10")
 #set(CXXFLAGS "-g")
 
-add_library(lib_pmpmeas lib/pmpmeas-api.c lib/pmpmeas.cc lib/meas.cc lib/papiinf.cc lib/perfinf.cc)
+add_library(pmpmeas lib/pmpmeas-api.c lib/pmpmeas.cc lib/meas.cc lib/papiinf.cc lib/perfinf.cc)
+add_library(m_pmpmeas lib/m_pmpmeas.f90)
 add_executable(tests_api-c.x tests/api-c.c)
 add_executable(tests_api-cpp.x tests/api-cpp.cc)
 add_executable(tests_api-f90.x tests/api-f90.f90)
-#add_executable(mydgemm.x mygemm/mydgemm.cc)
 
 add_definitions(-DPAPICNTMAX=${PAPICNTMAX})
 
@@ -36,7 +36,7 @@ if (USETIMEBASE)
   add_definitions(-DUSETIMEBASE)
 endif()
 
-target_include_directories(lib_pmpmeas PUBLIC
+target_include_directories(pmpmeas PUBLIC
 	${CMAKE_CURRENT_SOURCE_DIR}/include ${EXTRA_LIBS_INCDIR})
 target_include_directories(tests_api-c.x PUBLIC
 	${CMAKE_CURRENT_SOURCE_DIR}/include
@@ -50,21 +50,17 @@ target_include_directories(tests_api-f90.x PUBLIC
 	${CMAKE_CURRENT_SOURCE_DIR}/include
 	${CMAKE_CURRENT_SOURCE_DIR}/tests
 	${EXTRA_LIBS_INCDIR})
-#target_include_directories(mydgemm.x PUBLIC
-#	${CMAKE_CURRENT_SOURCE_DIR}/include
-#	${CMAKE_CURRENT_SOURCE_DIR}/mygemm
-#	${EXTRA_LIBS_INCDIR})
 
-target_link_libraries(tests_api-c.x LINK_PUBLIC lib_pmpmeas)
-target_link_libraries(tests_api-cpp.x LINK_PUBLIC lib_pmpmeas)
-target_link_libraries(tests_api-f90.x LINK_PUBLIC lib_pmpmeas)
-#target_link_libraries(mydgemm.x LINK_PUBLIC blas-bench)
+target_link_libraries(tests_api-c.x LINK_PUBLIC pmpmeas)
+target_link_libraries(tests_api-cpp.x LINK_PUBLIC pmpmeas)
+target_link_libraries(tests_api-f90.x LINK_PUBLIC m_pmpmeas)
+target_link_libraries(tests_api-f90.x LINK_PUBLIC pmpmeas)
 
-install (TARGETS lib_pmpmeas DESTINATION lib)
-install (TARGETS tests_api-c.x DESTINATION tests)
-install (TARGETS tests_api-cpp.x DESTINATION tests)
-install (TARGETS tests_api-f90.x DESTINATION tests)
-#install (TARGETS mydgemm.x DESTINATION bin)
+install(TARGETS pmpmeas DESTINATION lib)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/m_pmpmeas.mod DESTINATION include)
+install(TARGETS tests_api-c.x DESTINATION tests)
+install(TARGETS tests_api-cpp.x DESTINATION tests)
+install(TARGETS tests_api-f90.x DESTINATION tests)
 
 message("CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
 message("CMAKE_CXX_STANDARD_LIBRARIES: ${CMAKE_CXX_STANDARD_LIBRARIES}")
