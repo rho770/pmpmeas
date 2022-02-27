@@ -46,4 +46,6 @@ Some examples:
 - ```export PMPMEAS_MEAS_TYPES="TIME_CPU;PAPI=PAPI_L1_DCM,PAPI_L2_DCM"```
 - ```export PMPMEAS_MEAS_TYPES="TIME_CPU;PERF=cycles,LLC_loads"```
 
+WARNING: Both PAPI and Perf may access the performance monitor unit (PMU) and thus interfere. It is therefore not recommended to use PAPI and Perf counters in the same run.
+
 At the end of each run, the results will be dumped in a file in the local directory with a unique name.

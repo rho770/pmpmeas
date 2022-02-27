@@ -57,6 +57,7 @@ target_link_libraries(tests_api-f90.x LINK_PUBLIC m_pmpmeas)
 target_link_libraries(tests_api-f90.x LINK_PUBLIC pmpmeas)
 
 install(TARGETS pmpmeas DESTINATION lib)
+install(FILES include/pmpmeas-api.h DESTINATION include)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/m_pmpmeas.mod DESTINATION include)
 install(TARGETS tests_api-c.x DESTINATION tests)
 install(TARGETS tests_api-cpp.x DESTINATION tests)

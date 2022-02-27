@@ -118,12 +118,13 @@ void pmpmeas__stop(float weight)
 
 void pmpmeas__finish()
 {
+    const int len = 1024;
     struct tm * timeinfo;
-    char buf[1024];
-    char fname[1024];
+    char buf[len];
+    char fname[len];
     pid_t pid = getpid();
 
-    snprintf(fname, 1024, "pmpmeas_%06d_XXXXXX", pid);
+    snprintf(fname, len, "pmpmeas_%06d_XXXXXX", pid);
     mkstemp(fname);
     FILE *fp = fopen(fname, "w");
     if (fp == NULL)
@@ -133,15 +134,20 @@ void pmpmeas__finish()
     }
 
     timeinfo = localtime(&tstart);
-    strftime (buf, 1024, "%F %T", timeinfo);
-    fprintf(fp, "Start:       %s\n\n", buf);
+    strftime (buf, len, "%F %T", timeinfo);
+    fprintf(fp, "Start:       %s\n", buf);
+    fprintf(fp, "\n");
+
+    gethostname(buf, len);
+    fprintf(fp, "Hostname:    %s\n", buf);
+    fprintf(fp, "\n");
 
     for (list<Meas*>::iterator m = pmpmeas_meas_lst.begin(); m != pmpmeas_meas_lst.end(); m++)
         (*m)->dump(fp);
 
     time_t tend = time(NULL);
     timeinfo = localtime(&tend);
-    strftime (buf, 1024, "%F %T", timeinfo);
+    strftime (buf, len, "%F %T", timeinfo);
     fprintf(fp, "End:         %s\n", buf);
 
     fclose(fp);
