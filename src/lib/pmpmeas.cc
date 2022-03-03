@@ -65,6 +65,8 @@ extern "C" {
 
 void pmpmeas__init()
 {
+    tstart = time(NULL);
+
     char* t = getenv("PMPMEAS_MEAS_TYPES");
     if (t != NULL) {
         char *c1 = t;
@@ -90,7 +92,6 @@ void pmpmeas__init()
 void pmpmeas__start(const char *tag)
 {
     ctag = tag;
-    tstart = time(NULL);
 
     pmpmeas_match_lst.clear();
 

@@ -51,7 +51,7 @@ do i = 1, 10
   call pmpmeas_start("main::f90"//C_NULL_CHAR)
 
   x = 1e-16
-  do j = 1, 100000
+  do j = 1, 200000000
     x = x * 1.00000001
   end do
 
