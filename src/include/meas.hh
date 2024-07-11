@@ -45,9 +45,10 @@
 #include <limits>
 #include <vector>
 #include <string>
-#include "meastypes.hh"
-#include "papiinf.hh"
-#include "perfinf.hh"
+#include "meastypes.h"
+#include "papiinf.h"
+#include "perfinf.h"
+#include "utils.h"
 
 namespace PMPMEAS {
 
@@ -66,6 +67,7 @@ private:
     std::vector<double> _min;       //!< Minimum counter values
     std::vector<double> _max;       //!< Maximum counter values
     int _nmeas;                     //!< Number of measurements
+    std::vector<long long> _vals;   //!< Counter values
 
 public:
     Meas(const char* tag, MeasType type)
@@ -106,6 +108,7 @@ public:
         _mean.resize(_cnt);
         _min.resize(_cnt);
         _max.resize(_cnt);
+        _vals.resize(_cnt);
 
         for (int i = 0; i < _cnt; i++)
         {
@@ -113,6 +116,7 @@ public:
             _t[1][i] = 0;
             _min[i]  = std::numeric_limits<double>::max();
             _max[i]  = 0;
+            _vals[i]  = 0;
         }
     }
 
@@ -125,6 +129,12 @@ public:
     {
         _get(0);
     }
+
+	inline long long* read()
+	{
+		_read();
+		return(_vals.data());
+	}
 
     inline void stop(float weight = 1.0)
     {
@@ -159,7 +169,86 @@ public:
         return _avweight / _nmeas;
     }
 
+    int cnt() const
+    {
+        return _cnt;
+    }
+
+    int type() const
+    {
+        return _type();
+    }
+
+    const char* ename(int i) const
+    {
+        const char *ret;
+        switch (_type())
+        {
+            case MeasType::TIME_BOOT:
+                ret = "time_boot";
+                break;
+            case MeasType::TIME_CPU:
+                ret = "time_cpu";
+                break;
+            case MeasType::TIME_THRD:
+                ret = "time_thrd";
+                break;
+            case (MeasType::PAPI):
+                ret = _papi.ename(i);
+                break;
+            case (MeasType::PERF):
+                ret = _perf.ename(i);
+                break;
+            default: // TIME or unrecognized
+                break;
+        }
+
+        return ret;
+    }
+
 private:
+	void _read(void)
+	{
+    switch(_type())
+        {
+        case MeasType::TIME_BOOT:
+        { break; }
+
+        case MeasType::TIME_CPU:
+        { break; }
+
+        case MeasType::TIME_THRD:
+        { break; }
+
+        case MeasType::PAPI:
+        {
+			_papi.read();
+            for (int i=0; i<_cnt; ++i)
+                _vals[i] = _papi.eval(i);
+            break;
+        }
+
+        case MeasType::PERF:
+        {
+			_perf.pread();
+            for (int i=0; i<_cnt; ++i)
+                _vals[i] = _perf.eval(i);
+            break;
+        }
+
+        default:
+            #ifdef RTRACE_SUPPORT
+            char err_msg[100];
+            snprintf(err_msg, 100, "Internal error (%s,%d)\n", __FILE__, __LINE__);
+            report_and_exit(err_msg);
+            #else
+            fprintf(stderr, "Internal error (%s,%d)\n", __FILE__, __LINE__);
+            exit(1);
+            #endif /* ifdef rTrace */
+        }
+
+	}
+
     void _get(int i)
     {
         assert (i == 0 || i == 1);
@@ -229,8 +318,14 @@ private:
         }
 
         default:
+            #ifdef RTRACE_SUPPORT
+            char err_msg[100];
+            snprintf(err_msg, 100, "Internal error (%s,%d)\n", __FILE__, __LINE__);
+            report_and_exit(err_msg);
+            #else
             fprintf(stderr, "Internal error (%s,%d)\n", __FILE__, __LINE__);
             exit(1);
+            #endif /* ifdef rTrace */
         }
 
         if (i == 1)

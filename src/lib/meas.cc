@@ -37,7 +37,7 @@
  */
 
 #include <cstdio>
-#include "meas.hh"
+#include "meas.h"
 
 using namespace std;
 using namespace PMPMEAS;

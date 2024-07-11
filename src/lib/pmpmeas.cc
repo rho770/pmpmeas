@@ -41,8 +41,10 @@
 #include <time.h>
 #include <unistd.h>
 #include <list>
-#include "pmpmeas.hh"
-#include "meas.hh"
+#include <stdbool.h>
+#include "pmpmeas.h"
+#include "meas.h"
+#include "utils.h"
 
 using namespace std;
 using namespace PMPMEAS;
@@ -50,6 +52,9 @@ using namespace PMPMEAS;
 list<MeasType*> pmpmeas_type_lst;
 list<Meas*> pmpmeas_meas_lst;
 list<Meas*> pmpmeas_match_lst;
+
+
+#define LENGTH_ERR_MSG 1280
 
 string ctag;
 
@@ -105,10 +110,26 @@ void pmpmeas__start(const char *tag)
             Meas *m = new Meas(tag, *(*mt));
             pmpmeas_meas_lst.push_back(m);
             pmpmeas_match_lst.push_back(m);
+
         }
 
     for (list<Meas*>::iterator m = pmpmeas_match_lst.begin(); m != pmpmeas_match_lst.end(); m++)
         (*m)->start();
+
+}
+
+// NEW FUNCTION: Read (without stopping if possible) metric values
+Pmpmeas_vals pmpmeas__read()
+{
+    Pmpmeas_vals vals;
+    int index = 0;
+
+    for (list<Meas*>::iterator m = pmpmeas_meas_lst.begin(); m != pmpmeas_meas_lst.end(); m++){
+        memcpy( &(vals.data[index]), (*m)->read(), (*m)->cnt()*sizeof(long long));
+        index += (*m)->cnt();
+    }
+    vals.n = index;
+    return vals;
 }
 
 void pmpmeas__stop(float weight)
@@ -126,12 +147,18 @@ void pmpmeas__finish()
     pid_t pid = getpid();
 
     snprintf(fname, len, "pmpmeas_%06d_XXXXXX", pid);
-    mkstemp(fname);
+    int ret = mkstemp(fname);
     FILE *fp = fopen(fname, "w");
     if (fp == NULL)
     {
+        #ifdef RTRACE_SUPPORT
+        char err_msg[LENGTH_ERR_MSG];
+        snprintf(err_msg, LENGTH_ERR_MSG, "Failed to open file \"%s\" for writing\n", fname);
+        report_and_exit(err_msg);
+        #else
         fprintf(stderr, "Failed to open file \"%s\" for writing\n", fname);
         exit(1);
+        #endif /* ifdef rTrace */
     }
 
     timeinfo = localtime(&tstart);

@@ -42,6 +42,8 @@
 #include <string>
 #include <papi.h>
 
+//#define PAPICNTMAX 3
+
 namespace PMPMEAS {
 
 class PapiInf
@@ -62,6 +64,7 @@ public:
 
     void start(void);
     void stop(void);
+    void read(void);
 
     long long eval(int i) const
     {

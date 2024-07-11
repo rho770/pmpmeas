@@ -37,8 +37,9 @@
  */
 
 #include <stdio.h>
+#include <stdbool.h>
 #include "pmpmeas-api.h"
-#include "pmpmeas.hh"
+#include "pmpmeas.h"
 
 void pmpmeas_init()
 {
@@ -48,6 +49,11 @@ void pmpmeas_init()
 void pmpmeas_start(const char* tag)
 {
     pmpmeas__start(tag);
+}
+
+Pmpmeas_vals pmpmeas_read()
+{
+    return(pmpmeas__read());
 }
 
 void pmpmeas_stop(float weight)

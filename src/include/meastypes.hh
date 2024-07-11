@@ -44,6 +44,8 @@
 #include <string>
 #include <vector>
 #include <string.h>
+#include "utils.h"
+#include "config.h"
 
 using namespace std;
 
@@ -142,8 +144,14 @@ public:
         }
         else
         {
+            #ifdef RTRACE_SUPPORT
+            char err_msg[100];
+            snprintf(err_msg, 100, "[PMPMEAS] Unknown measurement type \"%s\"\n", type_str);
+            report_and_exit(err_msg);
+            #else
             fprintf(stderr, "[PMPMEAS] Unknown measurement type \"%s\"\n", type_str);
             exit(1);
+            #endif /* ifdef rTrace */
         }
     }
 

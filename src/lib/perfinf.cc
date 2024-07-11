@@ -40,16 +40,17 @@
  * Code for access to perf counters
 */
 
-#include "perfinf.hh"
+#include "perfinf.h"
 #include <unistd.h>
 #include <string.h>
 #include <sys/syscall.h>
 #include <sys/ioctl.h>
 #include <linux/perf_event.h>
 #include <asm/unistd.h>
+#include "utils.h"
+#include "config.h"
 
 int PerfInf::_cnt = 0;
-
 
 struct read_format {
     uint64_t nr;
@@ -67,8 +68,12 @@ PerfInf::PerfInf(void)
     _cnt++;
     if (_cnt > 1)
     {
+        #ifdef RTRACE_SUPPORT
+        report_and_exit("At most one object of class PerfInf must be instantiated!\n");
+        #else
         fprintf(stderr, "At most one object of class PerfInf must be instantiated!\n");
         exit(1);
+        #endif /* ifdef rTrace */
     }
 
     _nevent = 0;
@@ -78,8 +83,12 @@ PerfInf::PerfInf(void)
 int PerfInf::create(const std::string& ename)
 {
     if (_nevent >= PERF_CNTMAX) {
+        #ifdef RTRACE_SUPPORT
+        report_and_exit("Maximum number of PerfInf events exceeded\n");
+        #else
         fprintf(stderr, "Maximum number of PerfInf events exceeded\n");
         exit(1);
+        #endif /* ifdef rTrace */
     }
 
     struct perf_event_attr pea;
@@ -92,8 +101,14 @@ int PerfInf::create(const std::string& ename)
 #   include "perfinftypesxx.h"
     else
     {
+        #ifdef RTRACE_SUPPORT
+        char err_msg[100];
+        snprintf(err_msg, 100, "Unknown perf counter type \"%s\"\n", ename.c_str());
+        report_and_exit(err_msg);
+        #else
         fprintf(stderr, "Unknown perf counter type \"%s\"\n", ename.c_str());
         exit(1);
+        #endif /* ifdef rTrace */
     }
 
     pea.disabled = 1;
@@ -108,14 +123,24 @@ int PerfInf::create(const std::string& ename)
         _fd[_nevent] = syscall(__NR_perf_event_open, &pea, 0, -1, _fd[0], 0);
     }
     if (_fd[_nevent] == -1) {
+        #ifdef RTRACE_SUPPORT
+        char err_msg[100];
+        snprintf(err_msg, 100, "WARNING: PerfInf failed to create event (ename=%s, config=0x%llx)\n", ename.c_str(), pea.config);
+        report_and_exit(err_msg);
+        #else
         fprintf(stderr, "WARNING: PerfInf failed to create event (ename=%s, config=0x%llx)\n", ename.c_str(), pea.config);
         return -1;
+        #endif /* ifdef rTrace */
     }
 
     if (ioctl(_fd[_nevent], PERF_EVENT_IOC_ID, &_eid[_nevent]) != 0)
     {
+        #ifdef RTRACE_SUPPORT
+        report_and_exit("ioctl failed\n");
+        #else
         fprintf(stderr, "ioctl failed\n");
         exit(1);
+        #endif /* ifdef rTrace */
     }
 
     _nevent++;
@@ -146,13 +171,21 @@ void PerfInf::stop(void)
     if (_nevent > 0) {
         if (ioctl(_fd[0], PERF_EVENT_IOC_DISABLE, PERF_IOC_FLAG_GROUP) != 0)
         {
+            #ifdef RTRACE_SUPPORT
+            report_and_exit("ioctl failed\n");
+            #else
             fprintf(stderr, "ioctl failed\n");
             exit(1);
+            #endif /* ifdef rTrace */
         }
         if (read(_fd[0], _buf, sizeof(_buf)) == -1)
         {
+            #ifdef RTRACE_SUPPORT
+            report_and_exit("read failed\n");
+            #else
             fprintf(stderr, "read failed\n");
             exit(1);
+            #endif /* ifdef rTrace */
         }
 
         for (int j = 0; j < _nevent; j++)
@@ -164,5 +197,51 @@ void PerfInf::stop(void)
                 if (rf->values[i].id == _eid[j]) {
                     _eval[j] = rf->values[i].value;
                 }
+    }
+}
+
+// YOU ARE HERE - NEW FUNCTION: Pause, read values, resume 
+// Compile with -DRTRACE_SUPPORT to replace writes to stderr
+void PerfInf::pread(void)
+{
+    if (_nevent > 0) {
+        if (ioctl(_fd[0], PERF_EVENT_IOC_DISABLE, PERF_IOC_FLAG_GROUP) != 0)
+        {
+            #ifdef RTRACE_SUPPORT
+            report_and_exit("ioctl disable failed\n");
+            #else
+            fprintf(stderr, "ioctl disable failed\n");
+            exit(1);
+            #endif /* ifdef rTrace */
+        }
+        if (read(_fd[0], _buf, sizeof(_buf)) == -1)
+        {
+            #ifdef RTRACE_SUPPORT
+            report_and_exit("read failed\n");
+            #else
+            fprintf(stderr, "read failed\n");
+            exit(1);
+            #endif /* ifdef rTrace */
+        }
+
+        for (int j = 0; j < _nevent; j++)
+            _eval[j] = 0;
+
+        struct read_format* rf = (struct read_format*) _buf;
+        for (int i = 0; i < rf->nr; i++)
+            for (int j = 0; j < _nevent; j++)
+                if (rf->values[i].id == _eid[j]) {
+                    _eval[j] = rf->values[i].value;
+                }
+
+        if (ioctl(_fd[0], PERF_EVENT_IOC_ENABLE, PERF_IOC_FLAG_GROUP) != 0)
+        {
+            #ifdef RTRACE_SUPPORT
+            report_and_exit("ioctl enable failed\n");
+            #else
+            fprintf(stderr, "ioctl enable failed\n");
+            exit(1);
+            #endif /* ifdef rTrace */
+        }
     }
 }

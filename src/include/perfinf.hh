@@ -76,6 +76,7 @@ public:
 
     void start(void);
     void stop(void);
+    void pread(void);
 
     uint64_t eval(int i) const
     {
