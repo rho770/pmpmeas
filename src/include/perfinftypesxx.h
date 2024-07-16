@@ -2,7 +2,7 @@
  * PMPMEAS
  * -------
  *
- * Copyright 2022 Dirk Pleiter (pleiter@kth.se)
+ * Copyright 2022 Dirk Pleiter (dirk.pleiter@protonmail.com)
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

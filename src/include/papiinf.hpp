@@ -36,41 +36,51 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <stdio.h>
-#include "pmpmeas-api.h"
-#include "pmpmeas.hpp"
+#ifndef PMPMEAS_PAPIINF_H
+#define PMPMEAS_PAPIINF_H
 
-void pmpmeas_init()
-{
-    pmpmeas__init();
+#include <string>
+#include <papi.h>
+
+namespace PMPMEAS {
+
+    class PapiInf
+    {
+        private:
+            static int _cnt;
+
+            int _ctx;
+            int _nevent;                        //!< Number of events
+            std::string _ename[PAPICNTMAX];     //!< Event name
+            long long _eval[PAPICNTMAX];        //!< Event value
+
+        public:
+            PapiInf(void);
+
+            int create(const std::string&);
+            void cleanup();
+
+            void start(void);
+            void stop(void);
+
+            void read(void);
+
+            long long eval(int i) const
+            {
+                return _eval[i];
+            }
+
+            const char* ename(int i) const
+            {
+                return _ename[i].c_str();
+            }
+
+            int nevent() const
+            {
+                return _nevent;
+            }
+    };
+
 }
 
-void pmpmeas_start(const char* tag)
-{
-    pmpmeas__start(tag);
-}
-
-void pmpmeas_stop(float weight)
-{
-    pmpmeas__stop(weight);
-}
-
-void pmpmeas_stop_fortran(float *weight)
-{
-    pmpmeas__stop(*weight);
-}
-
-void pmpmeas_finish()
-{
-    pmpmeas__finish();
-}
-
-void pmpmeas_valcnt(int *cnt)
-{
-    pmpmeas__valcnt(cnt);
-}
-
-void pmpmeas_valrd(pmpmeas_vlst_t *vlst)
-{
-    pmpmeas__valrd(vlst);
-}
+#endif

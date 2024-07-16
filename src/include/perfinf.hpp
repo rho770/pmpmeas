@@ -36,41 +36,66 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <stdio.h>
-#include "pmpmeas-api.h"
-#include "pmpmeas.hpp"
+/*
+ * Code for access to perf counters
+*/
 
-void pmpmeas_init()
-{
-    pmpmeas__init();
+#ifndef PMPMEAS_PERFINF_H
+#define PMPMEAS_PERFINF_H
+
+#include <string>
+#include <inttypes.h>
+#include <unistd.h>
+
+#define PERF_CNTMAX 5       //!< Maximum number of events
+
+namespace PMPMEAS {
+
+    class PerfInf
+    {
+        public:
+            enum Type {
+#               define xx(a, b, c) a,
+#               include "perfinftypesxx.h"
+            };
+
+        private:
+            static int _cnt;                    //!< Number of instances (must be 0 or 1)
+
+            int _nevent;
+            int _fd[PERF_CNTMAX];
+            std::string _ename[PAPICNTMAX];     //!< Event name
+            uint64_t _eid[PERF_CNTMAX];         //!< Event ID
+            uint64_t _eval[PERF_CNTMAX];        //!< Event value
+
+            char* _buf[4096];
+
+        public:
+            PerfInf(void);
+
+            int create(const std::string&);
+            void cleanup();
+
+            void start(void);
+            void stop(void);
+            void read(void);
+
+            uint64_t eval(int i) const
+            {
+                return _eval[i];
+            }
+
+            const char* ename(int i) const
+            {
+                return _ename[i].c_str();
+            }
+
+            int nevent() const
+            {
+                return _nevent;
+            }
+    };
+
 }
 
-void pmpmeas_start(const char* tag)
-{
-    pmpmeas__start(tag);
-}
-
-void pmpmeas_stop(float weight)
-{
-    pmpmeas__stop(weight);
-}
-
-void pmpmeas_stop_fortran(float *weight)
-{
-    pmpmeas__stop(*weight);
-}
-
-void pmpmeas_finish()
-{
-    pmpmeas__finish();
-}
-
-void pmpmeas_valcnt(int *cnt)
-{
-    pmpmeas__valcnt(cnt);
-}
-
-void pmpmeas_valrd(pmpmeas_vlst_t *vlst)
-{
-    pmpmeas__valrd(vlst);
-}
+#endif

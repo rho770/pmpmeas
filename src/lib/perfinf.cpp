@@ -2,7 +2,7 @@
  * PMPMEAS
  * -------
  *
- * Copyright 2022 Dirk Pleiter (pleiter@kth.se)
+ * Copyright 2022 Dirk Pleiter (dirk.pleiter@protonmail.com)
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -40,13 +40,16 @@
  * Code for access to perf counters
 */
 
-#include "perfinf.hh"
+#include "perfinf.hpp"
 #include <unistd.h>
 #include <string.h>
 #include <sys/syscall.h>
 #include <sys/ioctl.h>
 #include <linux/perf_event.h>
 #include <asm/unistd.h>
+#include "logger.hpp"
+
+using namespace PMPMEAS;
 
 int PerfInf::_cnt = 0;
 
@@ -62,14 +65,9 @@ struct read_format {
 
 PerfInf::PerfInf(void)
 {
-    int ret;
-
     _cnt++;
     if (_cnt > 1)
-    {
-        fprintf(stderr, "At most one object of class PerfInf must be instantiated!\n");
-        exit(1);
-    }
+        logger.qdie("At most one object of class PerfInf must be instantiated!");
 
     _nevent = 0;
 }
@@ -77,10 +75,8 @@ PerfInf::PerfInf(void)
 
 int PerfInf::create(const std::string& ename)
 {
-    if (_nevent >= PERF_CNTMAX) {
-        fprintf(stderr, "Maximum number of PerfInf events exceeded\n");
-        exit(1);
-    }
+    if (_nevent >= PERF_CNTMAX)
+        logger.qdie("Maximum number of PerfInf events exceeded");
 
     struct perf_event_attr pea;
     memset(&pea, 0, sizeof(struct perf_event_attr));
@@ -91,32 +87,26 @@ int PerfInf::create(const std::string& ename)
 #   define xx(a, b, c) else if (ename == #a) { pea.type = b; pea.config = c; }
 #   include "perfinftypesxx.h"
     else
-    {
-        fprintf(stderr, "Unknown perf counter type \"%s\"\n", ename.c_str());
-        exit(1);
-    }
+        logger.qvdie("Unknown perf counter type \"%s\"", ename.c_str());
 
     pea.disabled = 1;
     pea.exclude_kernel = 1;
     pea.exclude_hv = 1;
     pea.read_format = PERF_FORMAT_GROUP | PERF_FORMAT_ID;
 
-    if (_nevent == 0) {
+    if (_nevent == 0)
         _fd[0]       = syscall(__NR_perf_event_open, &pea, 0, -1, -1,     0);
-    }
-    else {
+    else
         _fd[_nevent] = syscall(__NR_perf_event_open, &pea, 0, -1, _fd[0], 0);
-    }
-    if (_fd[_nevent] == -1) {
-        fprintf(stderr, "WARNING: PerfInf failed to create event (ename=%s, config=0x%llx)\n", ename.c_str(), pea.config);
+
+    if (_fd[_nevent] == -1)
+    {
+        logger.qverror("WARNING: PerfInf failed to create event (ename=%s, config=0x%llx)", ename.c_str() % pea.config);
         return -1;
     }
 
     if (ioctl(_fd[_nevent], PERF_EVENT_IOC_ID, &_eid[_nevent]) != 0)
-    {
-        fprintf(stderr, "ioctl failed\n");
-        exit(1);
-    }
+        logger.qdie("ioctl failed");
 
     _nevent++;
 
@@ -134,7 +124,8 @@ void PerfInf::cleanup(void)
 
 void PerfInf::start(void)
 {
-    if (_nevent > 0) {
+    if (_nevent > 0)
+    {
         ioctl(_fd[0], PERF_EVENT_IOC_RESET, PERF_IOC_FLAG_GROUP);
         ioctl(_fd[0], PERF_EVENT_IOC_ENABLE, PERF_IOC_FLAG_GROUP);
     }
@@ -143,26 +134,46 @@ void PerfInf::start(void)
 
 void PerfInf::stop(void)
 {
-    if (_nevent > 0) {
+    if (_nevent > 0)
+    {
         if (ioctl(_fd[0], PERF_EVENT_IOC_DISABLE, PERF_IOC_FLAG_GROUP) != 0)
-        {
-            fprintf(stderr, "ioctl failed\n");
-            exit(1);
-        }
-        if (read(_fd[0], _buf, sizeof(_buf)) == -1)
-        {
-            fprintf(stderr, "read failed\n");
-            exit(1);
-        }
+            logger.qdie("ioctl failed\n");
+
+        if (::read(_fd[0], _buf, sizeof(_buf)) == -1)
+            logger.qdie("read failed");
 
         for (int j = 0; j < _nevent; j++)
             _eval[j] = 0;
 
-        struct read_format* rf = (struct read_format*) _buf;
-        for (int i = 0; i < rf->nr; i++)
+        auto rf = (struct read_format*) _buf;
+        for (unsigned int i = 0; i < rf->nr; i++)
             for (int j = 0; j < _nevent; j++)
-                if (rf->values[i].id == _eid[j]) {
+                if (rf->values[i].id == _eid[j])
                     _eval[j] = rf->values[i].value;
-                }
+    }
+}
+
+
+void PerfInf::read(void)
+{
+    if (_nevent > 0)
+    {
+        if (ioctl(_fd[0], PERF_EVENT_IOC_DISABLE, PERF_IOC_FLAG_GROUP) != 0)
+            logger.qdie("ioctl disable failed");
+
+        if (::read(_fd[0], _buf, sizeof(_buf)) == -1)
+            logger.qdie("read failed");
+
+        for (int j = 0; j < _nevent; j++)
+            _eval[j] = 0;
+
+        auto rf = (struct read_format *) _buf;
+        for (unsigned int i = 0; i < rf->nr; i++) 
+            for (int j = 0; j < _nevent; j++)
+                if (rf->values[i].id == _eid[j])
+                    _eval[j] = rf->values[i].value;
+
+        if (ioctl(_fd[0], PERF_EVENT_IOC_ENABLE, PERF_IOC_FLAG_GROUP) != 0)
+            logger.qdie("ioctl enable failed");
     }
 }

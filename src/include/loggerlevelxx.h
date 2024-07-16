@@ -2,7 +2,7 @@
  * PMPMEAS
  * -------
  *
- * Copyright 2022 Dirk Pleiter (pleiter@kth.se)
+ * Copyright 2024 Dirk Pleiter (dirk.pleiter@protonmail.com)
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -36,41 +36,12 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <cstdio>
-#include "meas.hh"
+xx(die,     1,   1)
+xx(crit,    1,   0)
+xx(fatal,   1,   0)
+xx(error,   1,   0)
+xx(notice,  1,   0)
+xx(info,    1,   0)
+xx(debug,   1,   0)
 
-using namespace std;
-using namespace PMPMEAS;
-
-PapiInf Meas::_papi;
-PerfInf Meas::_perf;
-
-/*
- * Dump measurement results
- */
-
-void Meas::dump(FILE* fp)
-{
-    fprintf(fp, "Tag:         %s\n", _tag.c_str());
-    fprintf(fp,"Nmeas:       %d\n", nmeas());
-    fprintf(fp, "Avg. Weight: %.4e\n", avweight());
-    for (int i = 0; i < _cnt; i++)
-    {
-        const char* prefix = "";
-        switch (_type())
-        {
-        case MeasType::PAPI:
-            prefix = "PAPI=";
-            break;
-        case MeasType::PERF:
-            prefix = "PERF=";
-            break;
-        }
-        fprintf(fp, "Type[%d]:     %s%s\n", i, prefix, _type.typestr(i));
-
-        fprintf(fp, "Min[%d]:      %.4e\n", i, min(i));
-        fprintf(fp, "Mean[%d]:     %.4e\n", i, mean(i));
-        fprintf(fp, "Max[%d]:      %.4e\n", i, max(i));
-    }
-    fprintf(fp, "\n");
-}
+#undef xx

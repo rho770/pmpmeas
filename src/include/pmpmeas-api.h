@@ -2,7 +2,7 @@
  * PMPMEAS
  * -------
  *
- * Copyright 2022 Dirk Pleiter (pleiter@kth.se)
+ * Copyright 2022 Dirk Pleiter (dirk.pleiter@protonmail.com)
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -42,12 +42,25 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+    
+// list of pmpmeas values
+typedef struct {
+    int n;                  //!< Array capacity
+    long long *val;         //!< Array of values
+    int cnt;                //!< Number of values
+} pmpmeas_vlst_t;
 
 void pmpmeas_init();
+
 void pmpmeas_start(const char*);
+
 void pmpmeas_stop(float);
 void pmpmeas_stop_fortran(float*);
+
 void pmpmeas_finish();
+
+void pmpmeas_valcnt(int *);
+void pmpmeas_valrd(pmpmeas_vlst_t *);
 
 #ifdef __cplusplus
 }

@@ -2,7 +2,7 @@
  * PMPMEAS
  * -------
  *
- * Copyright 2022 Dirk Pleiter (pleiter@kth.se)
+ * Copyright 2022 Dirk Pleiter (dirk.pleiter@protonmail.com)
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -41,8 +41,9 @@
 #include <time.h>
 #include <unistd.h>
 #include <list>
-#include "pmpmeas.hh"
-#include "meas.hh"
+#include "pmpmeas.hpp"
+#include "meas.hpp"
+#include "logger.hpp"
 
 using namespace std;
 using namespace PMPMEAS;
@@ -68,16 +69,19 @@ void pmpmeas__init()
     tstart = time(NULL);
 
     char* t = getenv("PMPMEAS_MEAS_TYPES");
-    if (t != NULL) {
+    if (t != NULL)
+    {
         char *c1 = t;
         do {
             char *c0 = c1;
             for (; (*c1 != '\0') && (*c1 != ';'); c1++);
-            if (*c1 == ';') {
+            if (*c1 == ';')
+            {
                 *c1 = '\0';
                 pmpmeas_type_lst.push_back(new MeasType(c0));
             }
-            else {
+            else
+            {
                 pmpmeas_type_lst.push_back(new MeasType(c0));
                 break;
             }
@@ -129,10 +133,7 @@ void pmpmeas__finish()
     mkstemp(fname);
     FILE *fp = fopen(fname, "w");
     if (fp == NULL)
-    {
-        fprintf(stderr, "Failed to open file \"%s\" for writing\n", fname);
-        exit(1);
-    }
+        logger.qvdie("Failed to open file \"%s\" for writing\n", fname);
 
     timeinfo = localtime(&tstart);
     strftime (buf, len, "%F %T", timeinfo);
@@ -152,6 +153,30 @@ void pmpmeas__finish()
     fprintf(fp, "End:         %s\n", buf);
 
     fclose(fp);
+}
+
+
+void pmpmeas__valcnt(int *cnt)
+{
+    *cnt = 0;
+
+    for (list<Meas*>::iterator m = pmpmeas_meas_lst.begin(); m != pmpmeas_meas_lst.end(); m++)
+        *cnt += (*m)->cnt();
+}
+
+void pmpmeas__valrd(pmpmeas_vlst_t *vlst)
+{
+    vlst->cnt = 0;
+    for (list<Meas *>::iterator m = pmpmeas_meas_lst.begin(); m != pmpmeas_meas_lst.end(); m++)
+    {
+        (*m)->read();
+        for (auto i = 0; i < (*m)->cnt(); i++)
+            if (vlst->cnt < vlst->n)
+            {
+                vlst->val[vlst->cnt] += (*m)->val(i);
+                vlst->cnt++;
+            }
+    }
 }
 
 #ifdef __cplusplus

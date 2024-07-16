@@ -2,7 +2,7 @@
  * PMPMEAS
  * -------
  *
- * Copyright 2022 Dirk Pleiter (pleiter@kth.se)
+ * Copyright 2022 Dirk Pleiter (dirk.pleiter@protonmail.com)
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -36,64 +36,25 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/*
- * Code for access to perf counters
-*/
+#ifndef PMPMEAS_HH
+#define PMPMEAS_HH
 
-#ifndef PMPMEAS_PERFINF_H
-#define PMPMEAS_PERFINF_H
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
+#include "pmpmeas-api.h"
 
-#include <string>
-#include <inttypes.h>
-#include <unistd.h>
+void pmpmeas__init();
+void pmpmeas__start(const char*);
+void pmpmeas__stop(float);
+void pmpmeas__finish();
 
-#define PERF_CNTMAX 5       //!< Maximum number of events
+void pmpmeas__valcnt(int *);
+void pmpmeas__valrd(pmpmeas_vlst_t *);
 
-class PerfInf
-{
-public:
-    enum Type {
-#       define xx(a, b, c) a,
-#       include "perfinftypesxx.h"
-    };
-
-private:
-    static int _cnt;                    //!< Number of instances (must be 0 or 1)
-
-    int _nevent;
-    int _fd[PERF_CNTMAX];
-    std::string _ename[PAPICNTMAX];     //!< Event name
-    uint64_t _eid[PERF_CNTMAX];         //!< Event ID
-    uint64_t _eval[PERF_CNTMAX];        //!< Event value
-
-    char* _buf[4096];
-
-public:
-    PerfInf(void);
-
-    int create(const std::string&);
-    void cleanup();
-
-    void start(void);
-    void stop(void);
-
-    uint64_t eval(int i) const
-    {
-        return _eval[i];
-    }
-
-    const char* ename(int i) const
-    {
-        return _ename[i].c_str();
-    }
-
-    int nevent() const
-    {
-        return _nevent;
-    }
-
-private:
-    //long _perf_event_open(struct perf_event_attr *, pid_t, int, int, unsigned long);
-};
+#ifdef __cplusplus
+}
+#endif
 
 #endif

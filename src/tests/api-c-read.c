@@ -2,7 +2,7 @@
  * PMPMEAS
  * -------
  *
- * Copyright 2022 Dirk Pleiter (pleiter@kth.se)
+ * Copyright 2022 Dirk Pleiter (dirk.pleiter@protonmail.com)
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -36,49 +36,37 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef PMPMEAS_PAPIINF_H
-#define PMPMEAS_PAPIINF_H
+#include <stdio.h>
+#include <stdlib.h>
+#include "pmpmeas-api.h"
 
-#include <string>
-#include <papi.h>
+#define N 3000000
 
-namespace PMPMEAS {
+double x;
 
-class PapiInf
+int main()
 {
-private:
-    static int _cnt;
+    printf("TEST:  This is the C main program\n");
 
-    int _ctx;
-    int _nevent;                        //!< Number of events
-    std::string _ename[PAPICNTMAX];     //!< Event name
-    long long _eval[PAPICNTMAX];        //!< Event value
+    pmpmeas_vlst_t vlst;
+    vlst.n   = 2;
+    vlst.val = (long long *)malloc(vlst.n * sizeof(long long));
+    vlst.cnt = 0;
 
-public:
-    PapiInf(void);
+    pmpmeas_init();
+    pmpmeas_start("main::c");
 
-    int create(const std::string&);
-    void cleanup();
+    for (int j = 0; j < N; j++)
+        x *= 1.000000001;
 
-    void start(void);
-    void stop(void);
+    pmpmeas_valrd(&vlst);
 
-    long long eval(int i) const
-    {
-        return _eval[i];
-    }
+    pmpmeas_stop(1.0);
+    pmpmeas_finish();
 
-    const char* ename(int i) const
-    {
-        return _ename[i].c_str();
-    }
+    printf("vlst.cnt = %d\n", vlst.cnt);
+    for (int i = 0; i < vlst.cnt; i++)
+        printf("vlst.val[%d] = %lld\n", i, vlst.val[i]);
 
-    int nevent() const
-    {
-        return _nevent;
-    }
-};
-
+    return 0;
 }
-
-#endif

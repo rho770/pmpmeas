@@ -2,7 +2,7 @@
  * PMPMEAS
  * -------
  *
- * Copyright 2022 Dirk Pleiter (pleiter@kth.se)
+ * Copyright 2022 Dirk Pleiter (dirk.pleiter@protonmail.com)
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -36,7 +36,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "papiinf.hh"
+#include "papiinf.hpp"
+#include "logger.hpp"
 
 using namespace PMPMEAS;
 
@@ -44,29 +45,18 @@ int PapiInf::_cnt = 0;
 
 PapiInf::PapiInf(void)
 {
-    int ret;
-
-#if USEPAPI
+#if PMPMEAS_USEPAPI
     _cnt++;
     if (_cnt > 1)
-    {
-        fprintf(stderr, "At most one object of class PapiInf must be instantiated!\n");
-        exit(1);
-    }
+        logger.qdie("At most one object of class PapiInf must be instantiated!");
 
     if (PAPI_library_init(PAPI_VER_CURRENT) != PAPI_VER_CURRENT)
-    {
-        fprintf(stderr, "PAPI library init error!\n");
-        exit(1);
-    }
+        logger.qdie("PAPI library init error!");
 
     _ctx = PAPI_NULL;
-    ret = PAPI_create_eventset(&_ctx);
+    auto ret = PAPI_create_eventset(&_ctx);
     if (ret != PAPI_OK)
-    {
-        fprintf(stderr, "Failed to create event set (%s)\n", PAPI_strerror(ret));
-        exit(1);
-    }
+        logger.qvdie("Failed to create event set (%s)", PAPI_strerror(ret));
 #endif
 
     _nevent = 0;
@@ -74,26 +64,20 @@ PapiInf::PapiInf(void)
 
 int PapiInf::create(const std::string& ename)
 {
-    int ret;
-
-#if USEPAPI
+#if PMPMEAS_USEPAPI
     if (_nevent == PAPICNTMAX)
-    {
-        fprintf(stderr, "Exceeding upper limit of number of PAPI events\n");
-        exit(1);
-    }
+        logger.qdie("Exceeding upper limit of number of PAPI events");
 
-    ret = PAPI_add_named_event(_ctx, (char*) ename.c_str());
+    auto ret = PAPI_add_named_event(_ctx, (char *)ename.c_str());
     if (ret != PAPI_OK)
     {
-        fprintf(stderr, "WARNING: PAPI_add_named_event failed (%s,\"%s\")\n",
-                PAPI_strerror(ret), ename.c_str());
+        logger.qverror("PAPI_add_named_event failed (%s,\"%s\")", PAPI_strerror(ret) % ename.c_str());
         return -1;
     }
 
     _ename[_nevent] = ename.c_str();
     _nevent++;
-//fprintf(stderr, "DEBUG[%s,%d]: ename=%s, nevent=%d\n", __FILE__, __LINE__, ename.c_str(), _nevent);
+     logger.qvdebug("ename=%s, nevent=%d", ename.c_str() % _nevent);
 
     return (_nevent - 1);
 #else
@@ -103,15 +87,10 @@ int PapiInf::create(const std::string& ename)
 
 void PapiInf::cleanup()
 {
-    int ret;
-
-#if USEPAPI
-    ret = PAPI_cleanup_eventset(_ctx);
+#if PMPMEAS_USEPAPI
+    auto ret = PAPI_cleanup_eventset(_ctx);
     if (ret != PAPI_OK)
-    {
-        fprintf(stderr, "PAPI_cleanup_eventset failed (%s)\n", PAPI_strerror(ret));
-        exit(1);
-    }
+        logger.qvdie("PAPI_cleanup_eventset failed (%s)\n", PAPI_strerror(ret));
 #endif
 
     _nevent = 0;
@@ -119,25 +98,27 @@ void PapiInf::cleanup()
 
 void PapiInf::start(void)
 {
-#if USEPAPI
-    if (PAPI_start(_ctx) != PAPI_OK)
-    {
-        fprintf(stderr, "PAPI_start failed\n");
-        exit(1);
-    }
+#if PMPMEAS_USEPAPI
+    auto ret = PAPI_start(_ctx);
+    if (ret != PAPI_OK)
+        logger.qdie("PAPI_start failed\n");
 #endif
 }
 
 void PapiInf::stop(void)
 {
-    int ret;
-
-#if USEPAPI
-    ret = PAPI_stop(_ctx, _eval);
+#if PMPMEAS_USEPAPI
+    auto ret = PAPI_stop(_ctx, _eval);
     if (ret != PAPI_OK)
-    {
-        fprintf(stderr, "PAPI_stop failed (%s)\n", PAPI_strerror(ret));
-        exit(1);
-    }
+        logger.qvdie("PAPI_stop failed (%s)", ret);
+#endif
+}
+
+void PapiInf::read(void)
+{
+#if PMPMEAS_USEPAPI
+    auto ret = PAPI_read(_ctx, _eval);
+    if (ret != PAPI_OK)
+        logger.qvdie("PAPI_stop failed (%s)", ret);
 #endif
 }

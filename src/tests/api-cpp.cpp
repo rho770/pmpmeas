@@ -2,7 +2,7 @@
  * PMPMEAS
  * -------
  *
- * Copyright 2022 Dirk Pleiter (pleiter@kth.se)
+ * Copyright 2022 Dirk Pleiter (dirk.pleiter@protonmail.com)
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -36,20 +36,17 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef PMPMEAS_HH
-#define PMPMEAS_HH
+#include <iostream>
+#include "pmpmeas-api.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+int main()
+{
+    std::cout << "TEST:  This is the C++ main program\n";
 
-void pmpmeas__init();
-void pmpmeas__start(const char*);
-void pmpmeas__stop(float);
-void pmpmeas__finish();
+    pmpmeas_init();
+    pmpmeas_start("main::c++");
+    pmpmeas_stop(1.0);
+    pmpmeas_finish();
 
-#ifdef __cplusplus
+    return 0;
 }
-#endif
-
-#endif
