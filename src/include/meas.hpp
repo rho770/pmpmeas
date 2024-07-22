@@ -177,6 +177,38 @@ namespace PMPMEAS {
                 return _avweight / _nmeas;
             }
 
+            const char* ename(int i)
+            {
+                const char* ename;
+                if (i >= _cnt)
+                { 
+                    logger.qdie("Invalid index for ename");
+                }
+
+                switch( _type() ) 
+                {
+                    case (MeasType::PAPI):
+                        ename = _papi.ename(i);    
+                        break;
+                    case (MeasType::PERF):
+                        ename = _perf.ename(i);    
+                        break;
+                    case (MeasType::TIME_BOOT):
+                        ename = "TIME_BOOT";
+                        break;
+                    case (MeasType::TIME_CPU):
+                        ename = "TIME_CPU";
+                        break;
+                    case (MeasType::TIME_THRD):
+                        ename = "TIME_CPU";
+                        break;
+                    default: // unrecognized
+                        logger.qdie("Unrecognized Meas type");
+                }
+                return(ename);
+            }
+
+
         private:
             long long _time_boot(void)
             {

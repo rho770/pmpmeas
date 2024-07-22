@@ -47,7 +47,11 @@
 #define vdie(fmt, ARGS...)     PMPMEAS::_die(__FILE__, __LINE__, boost::format(fmt) % ARGS)
 
 #ifdef PMPMEAS_USERTRACE
+#ifdef PMPMEAS_USERTRACE_TEST
 void report_and_exit(const char*);
+#else
+#include "utils.h"
+#endif
 #endif
 
 namespace PMPMEAS {
