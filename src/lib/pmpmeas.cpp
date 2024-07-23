@@ -130,7 +130,7 @@ void pmpmeas__finish()
     pid_t pid = getpid();
 
     snprintf(fname, len, "pmpmeas_%06d_XXXXXX", pid);
-    mkstemp(fname);
+    int ret = mkstemp(fname);
     FILE *fp = fopen(fname, "w");
     if (fp == NULL)
         logger.qvdie("Failed to open file \"%s\" for writing\n", fname);

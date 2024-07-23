@@ -51,6 +51,7 @@
 void report_and_exit(const char*);
 #else
 #include "utils.h"
+#include "config.h"
 #endif
 #endif
 
